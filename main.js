@@ -12,10 +12,14 @@ let userData = {
     learningStreak: 0,
     readingStreak: 0,
     exerciseStreak: 0,
+    checkinStreak: 0,
+    lastCheckinDate: null,
+    checkinHistory: {}, // New property to store check-in history
     quizScores: { physical: 0, mental: 0, concentration: 0 },
     quizHistory: [],
     lastLoginDate: null,
-    lastActivityDate: null
+    lastActivityDate: null,
+    activityHistory: {} // New property to store activity history
 };
 
 const todayIndex = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
@@ -61,6 +65,9 @@ const allBadges = [
     { id: 'exercise_streak_5', name: 'Chuỗi tập thể dục 5', description: 'Hoàn thành hoạt động tập thể dục 5 ngày liên tiếp', icon: '💪' },
     { id: 'exercise_streak_10', name: 'Chuỗi tập thể dục 10', description: 'Hoàn thành hoạt động tập thể dục 10 ngày liên tiếp', icon: '🏋️' },
     { id: 'custom_activity', name: 'Sáng tạo', description: 'Thêm một hoạt động lành mạnh của riêng bạn', icon: '🎨' },
+    { id: 'checkin_streak_5', name: 'Điểm danh 5 ngày', description: 'Điểm danh 5 ngày liên tiếp', icon: '📅' },
+    { id: 'checkin_streak_10', name: 'Điểm danh 10 ngày', description: 'Điểm danh 10 ngày liên tiếp', icon: '📆' },
+    { id: 'checkin_streak_20', name: 'Điểm danh 20 ngày', description: 'Điểm danh 20 ngày liên tiếp', icon: '🗓️' },
 ];
 
 const quizQuestions = {
@@ -100,6 +107,10 @@ const pomodoro = {
     intervalId: null
 };
 
+// Countdown Timer Variables
+let countdownInterval = null;
+let currentHistoryDate = new Date();
+
 // Initialize localStorage
 function initLocalStorage() {
     if (!localStorage.getItem('userId')) {
@@ -112,13 +123,201 @@ function initLocalStorage() {
     const savedData = localStorage.getItem('userData');
     if (savedData) {
         userData = JSON.parse(savedData);
+        
+        // Initialize activityHistory if it doesn't exist
+        if (!userData.activityHistory) {
+            userData.activityHistory = {};
+            saveData();
+        }
+        
+        // Initialize checkinHistory if it doesn't exist
+        if (!userData.checkinHistory) {
+            userData.checkinHistory = {};
+            saveData();
+        }
+        
+        // Initialize checkinStreak if it doesn't exist
+        if (userData.checkinStreak === undefined) {
+            userData.checkinStreak = 0;
+            saveData();
+        }
+        
+        // Initialize lastCheckinDate if it doesn't exist
+        if (!userData.lastCheckinDate) {
+            userData.lastCheckinDate = null;
+            saveData();
+        }
     } else {
         saveData();
     }
+    
+    // Check for activity reset
+    checkActivityReset();
 }
 
 function saveData() {
     localStorage.setItem('userData', JSON.stringify(userData));
+}
+
+// Check if activities need to be reset (at 6:00 AM GMT+7)
+function checkActivityReset() {
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const lastResetDate = userData.lastResetDate || '';
+    
+    // Get current time in GMT+7
+    const gmt7Hours = (now.getUTCHours() + 7) % 24;
+    const gmt7Minutes = now.getUTCMinutes();
+    
+    // Check if it's 6:00 AM or later and we haven't reset today
+    if (today !== lastResetDate && gmt7Hours >= 6) {
+        // Save today's activities to history before reset
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().slice(0, 10);
+        
+        if (!userData.activityHistory[yesterdayStr]) {
+            userData.activityHistory[yesterdayStr] = {};
+        }
+        
+        // Save completed activities to history
+        Object.keys(userData.completedActivities).forEach(activityId => {
+            if (userData.completedActivities[activityId] === today) {
+                userData.activityHistory[yesterdayStr][activityId] = true;
+            }
+        });
+        
+        // Check if user stayed under limit yesterday
+        const yesterdayIndex = (yesterday.getDay() + 6) % 7; // Convert to 0=Mon, 1=Tue, ..., 6=Sun
+        const yesterdayUsage = userData.weeklyData[yesterdayIndex] || 0;
+        const userLimit = userData.limit || 60;
+        
+        if (yesterdayUsage <= userLimit) {
+            // Increment under limit streak
+            userData.underLimitStreak = (userData.underLimitStreak || 0) + 1;
+            
+            // Award badges based on streak
+            if (userData.underLimitStreak >= 1) awardBadge('under_limit_1');
+            if (userData.underLimitStreak >= 5) awardBadge('under_limit_5');
+            if (userData.underLimitStreak >= 10) awardBadge('under_limit_10');
+            if (userData.underLimitStreak >= 20) awardBadge('under_limit_20');
+            
+            showNotification("Thành Tựu Mới!", `Bạn đã giữ thời gian sử dụng dưới giới hạn trong ${userData.underLimitStreak} ngày!`);
+        } else {
+            // Reset streak if over limit
+            userData.underLimitStreak = 0;
+        }
+        
+        // Reset completed activities
+        userData.completedActivities = {};
+        userData.lastResetDate = today;
+        saveData();
+        
+        // Show notification
+        showNotification("Reset Hoạt Động", "Hoạt động lành mạnh đã được reset cho ngày mới!");
+    }
+}
+
+// Update countdown timer to 6:00 AM GMT+7
+function updateCountdownTimer() {
+    const now = new Date();
+    
+    // Get current time in GMT+7
+    const gmt7Hours = (now.getUTCHours() + 7) % 24;
+    const gmt7Minutes = now.getUTCMinutes();
+    const gmt7Seconds = now.getUTCSeconds();
+    
+    // Calculate time until 6:00 AM GMT+7
+    let hoursUntilReset = 0;
+    let minutesUntilReset = 0;
+    let secondsUntilReset = 0;
+    
+    if (gmt7Hours < 6) {
+        // Current time is before 6:00 AM
+        hoursUntilReset = 6 - gmt7Hours - 1;
+        minutesUntilReset = 60 - gmt7Minutes - 1;
+        secondsUntilReset = 60 - gmt7Seconds;
+    } else {
+        // Current time is after 6:00 AM, calculate until tomorrow
+        hoursUntilReset = 24 - gmt7Hours + 6 - 1;
+        minutesUntilReset = 60 - gmt7Minutes - 1;
+        secondsUntilReset = 60 - gmt7Seconds;
+    }
+    
+    // Format the time as HH:MM:SS
+    const formattedTime = 
+        String(hoursUntilReset).padStart(2, '0') + ':' +
+        String(minutesUntilReset).padStart(2, '0') + ':' +
+        String(secondsUntilReset).padStart(2, '0');
+    
+    document.getElementById('countdown-timer').textContent = formattedTime;
+}
+
+// Start countdown timer
+function startCountdownTimer() {
+    // Update immediately
+    updateCountdownTimer();
+    
+    // Update every second
+    countdownInterval = setInterval(updateCountdownTimer, 1000);
+}
+
+// Format date as dd/mm/yyyy
+function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+}
+
+// Update activity history display
+function updateActivityHistory() {
+    const dateStr = currentHistoryDate.toISOString().slice(0, 10);
+    document.getElementById('history-date-display').textContent = formatDate(currentHistoryDate);
+    
+    const allActivities = defaultHealthyActivities.concat(userData.customActivities || []);
+    const completedActivities = userData.activityHistory[dateStr] || {};
+    
+    document.getElementById('activity-history-container').innerHTML = allActivities.map(activity => `
+        <div class="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
+            <p class="text-gray-700">${activity.name}</p>
+            <span class="px-4 py-1 rounded-full text-sm font-semibold 
+                ${completedActivities[activity.id] ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}">
+                ${completedActivities[activity.id] ? 'Đã Xong' : 'Chưa làm'}
+            </span>
+        </div>
+    `).join('');
+}
+
+// Update check-in streak visualization
+function updateCheckinStreakVisualization() {
+    const container = document.getElementById('checkin-streak-container');
+    if (!container) return;
+    
+    // Get the last 7 days
+    const days = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        days.push(date.toISOString().slice(0, 10));
+    }
+    
+    // Day names
+    const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    
+    container.innerHTML = days.map((dateStr, index) => {
+        const dayName = dayNames[new Date(dateStr).getDay()];
+        const hasCheckedIn = userData.checkinHistory[dateStr] || false;
+        
+        return `
+            <div class="day-item">
+                <i class="fas fa-fire fire-icon ${hasCheckedIn ? 'fire-active' : 'fire-inactive'}"></i>
+                <span class="text-xs text-gray-600">${dayName}</span>
+            </div>
+        `;
+    }).join('');
 }
 
 // Initialize app
@@ -134,6 +333,7 @@ function initApp() {
     if (document.getElementById('user-id-display')) {
         document.getElementById('user-id-display').textContent = userId;
         updateMainUI();
+        startCountdownTimer();
     }
     
     if (document.getElementById('quiz-content')) {
@@ -170,6 +370,26 @@ function updateMainUI() {
         </div>
     `).join('');
 
+    // Update check-in button
+    const today = new Date().toISOString().slice(0, 10);
+    const hasCheckedInToday = userData.checkinHistory[today] || false;
+    const checkinBtn = document.getElementById('checkin-btn');
+    
+    if (checkinBtn) {
+        if (hasCheckedInToday) {
+            checkinBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Đã Điểm Danh Hôm Nay';
+            checkinBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            checkinBtn.disabled = true;
+        } else {
+            checkinBtn.innerHTML = '<i class="fas fa-calendar-check mr-2"></i> Điểm Danh Hàng Ngày';
+            checkinBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            checkinBtn.disabled = false;
+        }
+    }
+
+    // Update check-in streak visualization
+    updateCheckinStreakVisualization();
+
     // Update activities
     const allActivities = defaultHealthyActivities.concat(userData.customActivities || []);
     document.getElementById('healthy-activities-list').innerHTML = allActivities.map(activity => `
@@ -193,6 +413,9 @@ function updateMainUI() {
    
     // Update charts
     updateCharts();
+    
+    // Update activity history
+    updateActivityHistory();
 }
 
 // Update Survey Page UI
@@ -457,6 +680,10 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'index.html';
     });
     
+    document.getElementById('back-to-main-after-quiz')?.addEventListener('click', () => {
+        window.location.href = 'index.html';
+    });
+    
     // Main page event listeners
     document.getElementById('set-limit-btn')?.addEventListener('click', async () => {
         const newLimit = parseInt(document.getElementById('limit-input').value, 10);
@@ -499,45 +726,99 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Check-in button event listener
+    document.getElementById('checkin-btn')?.addEventListener('click', async () => {
+        const today = new Date().toISOString().slice(0, 10);
+        
+        // Check if already checked in today
+        if (userData.checkinHistory[today]) {
+            showNotification("Đã Điểm Danh", "Bạn đã điểm danh hôm nay rồi!");
+            return;
+        }
+        
+        // Update check-in history
+        userData.checkinHistory[today] = true;
+        
+        // Update check-in streak
+        const lastCheckinDate = userData.lastCheckinDate;
+        const isSequential = (lastCheckinDate && (new Date(today) - new Date(lastCheckinDate)) / (1000 * 60 * 60 * 24) === 1);
+        userData.checkinStreak = isSequential ? (userData.checkinStreak || 0) + 1 : 1;
+        userData.lastCheckinDate = today;
+        
+        // Award badges based on streak
+        if (userData.checkinStreak >= 5) awardBadge('checkin_streak_5');
+        if (userData.checkinStreak >= 10) awardBadge('checkin_streak_10');
+        if (userData.checkinStreak >= 20) awardBadge('checkin_streak_20');
+        
+        saveData();
+        showNotification("Điểm Danh Thành Công!", `Bạn đã điểm danh ${userData.checkinStreak} ngày liên tiếp!`);
+        updateMainUI();
+    });
+
     document.addEventListener('click', async (e) => {
         if (e.target.matches('.complete-activity-btn')) {
             const activityId = e.target.dataset.id;
             const activityName = defaultHealthyActivities.find(a => a.id === activityId)?.name || userData.customActivities.find(a => a.id === activityId)?.name;
-            if (!userData.completedActivities[activityId]) {
-                userData.completedActivities[activityId] = new Date().toISOString().slice(0, 10);
-                saveData();
-
-                awardBadge('first_activity');
-                const allActivitiesCompleted = [...defaultHealthyActivities, ...(userData.customActivities || [])].every(activity => userData.completedActivities[activity.id]);
-                if (allActivitiesCompleted) {
-                    awardBadge('all_activities');
-                }
-               
-                const today = new Date().toISOString().slice(0, 10);
-                const lastDate = userData.lastActivityDate;
-               
-                const isSequential = (lastDate && (new Date(today) - new Date(lastDate)) / (1000 * 60 * 60 * 24) === 1);
-               
-                if (activityId.includes('reading')) {
-                    userData.readingStreak = isSequential ? (userData.readingStreak || 0) + 1 : 1;
-                    if (userData.readingStreak >= 5) awardBadge('reading_streak_5');
-                    if (userData.readingStreak >= 10) awardBadge('reading_streak_10');
-                }
-                if (activityId.includes('exercise')) {
-                    userData.exerciseStreak = isSequential ? (userData.exerciseStreak || 0) + 1 : 1;
-                    if (userData.exerciseStreak >= 5) awardBadge('exercise_streak_5');
-                    if (userData.exerciseStreak >= 10) awardBadge('exercise_streak_10');
-                }
-                if (activityId.includes('learning')) {
-                    userData.learningStreak = isSequential ? (userData.learningStreak || 0) + 1 : 1;
-                    if (userData.learningStreak >= 5) awardBadge('learning_streak_5');
-                    if (userData.learningStreak >= 10) awardBadge('learning_streak_10');
-                }
-               
-                userData.lastActivityDate = today;
-                saveData();
-                updateMainUI();
+            
+            // Check if already completed today
+            const today = new Date().toISOString().slice(0, 10);
+            if (userData.completedActivities[activityId] === today) {
+                return; // Already completed today
             }
+            
+            // Mark activity as completed
+            userData.completedActivities[activityId] = today;
+            
+            // Also save to today's activity history
+            if (!userData.activityHistory[today]) {
+                userData.activityHistory[today] = {};
+            }
+            userData.activityHistory[today][activityId] = true;
+            
+            saveData();
+
+            awardBadge('first_activity');
+            const allActivitiesCompleted = [...defaultHealthyActivities, ...(userData.customActivities || [])].every(activity => userData.completedActivities[activity.id]);
+            if (allActivitiesCompleted) {
+                awardBadge('all_activities');
+            }
+           
+            const lastDate = userData.lastActivityDate;
+            const isSequential = (lastDate && (new Date(today) - new Date(lastDate)) / (1000 * 60 * 60 * 24) === 1);
+           
+            if (activityId.includes('reading')) {
+                userData.readingStreak = isSequential ? (userData.readingStreak || 0) + 1 : 1;
+                if (userData.readingStreak >= 5) awardBadge('reading_streak_5');
+                if (userData.readingStreak >= 10) awardBadge('reading_streak_10');
+            }
+            if (activityId.includes('exercise')) {
+                userData.exerciseStreak = isSequential ? (userData.exerciseStreak || 0) + 1 : 1;
+                if (userData.exerciseStreak >= 5) awardBadge('exercise_streak_5');
+                if (userData.exerciseStreak >= 10) awardBadge('exercise_streak_10');
+            }
+            if (activityId.includes('learning')) {
+                userData.learningStreak = isSequential ? (userData.learningStreak || 0) + 1 : 1;
+                if (userData.learningStreak >= 5) awardBadge('learning_streak_5');
+                if (userData.learningStreak >= 10) awardBadge('learning_streak_10');
+            }
+           
+            userData.lastActivityDate = today;
+            saveData();
+            updateMainUI();
+        }
+    });
+
+    // Activity history navigation
+    document.getElementById('prev-day-btn')?.addEventListener('click', () => {
+        currentHistoryDate.setDate(currentHistoryDate.getDate() - 1);
+        updateActivityHistory();
+    });
+
+    document.getElementById('next-day-btn')?.addEventListener('click', () => {
+        const today = new Date();
+        if (currentHistoryDate < today) {
+            currentHistoryDate.setDate(currentHistoryDate.getDate() + 1);
+            updateActivityHistory();
         }
     });
 
