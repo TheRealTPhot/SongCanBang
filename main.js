@@ -48,9 +48,9 @@ const allBadges = [
     { id: 'first_activity', name: 'Hoạt động đầu tiên', description: 'Hoàn thành hoạt động lành mạnh đầu tiên', icon: '🌱' },
     { id: 'all_activities', name: 'Toàn năng', description: 'Hoàn thành tất cả hoạt động lành mạnh trong một ngày', icon: '🌟' },
     { id: 'quiz_pro', name: 'Chuyên gia sức khỏe', description: 'Hoàn thành bài kiểm tra sức khỏe', icon: '🧠' },
-    { id: 'dependency_low_50', name: 'Tự chủ số', description: 'Đạt điểm phụ thuộc mạng xã hội dưới 50%', icon: '⚖️' },
-    { id: 'dependency_low_40', name: 'Giải phóng', description: 'Đạt điểm phụ thuộc mạng xã hội dưới 40%', icon: '🕊️' },
-    { id: 'dependency_low_30', name: 'Chủ nhân cuộc sống', description: 'Đạt điểm phụ thuộc mạng xã hội dưới 30%', icon: '🔮' },
+    { id: 'dependency_low_50', name: 'Tự chủ số', description: 'Điểm phụ thuộc dưới 50%', icon: '⚖️' },
+    { id: 'dependency_low_40', name: 'Giải phóng', description: 'Điểm phụ thuộc dưới 40%', icon: '🕊️' },
+    { id: 'dependency_low_30', name: 'Chủ nhân cuộc sống', description: 'Điểm phụ thuộc dưới 30%', icon: '🔮' },
     { id: 'learning_streak_5', name: 'Chuỗi học tập 5', description: 'Hoàn thành hoạt động học tập 5 ngày liên tiếp', icon: '📖' },
     { id: 'learning_streak_10', name: 'Chuỗi học tập 10', description: 'Hoàn thành hoạt động học tập 10 ngày liên tiếp', icon: '🎓' },
     { id: 'reading_streak_5', name: 'Chuỗi đọc sách 5', description: 'Hoàn thành hoạt động đọc sách 5 ngày liên tiếp', icon: '📕' },
@@ -60,27 +60,28 @@ const allBadges = [
     { id: 'custom_activity', name: 'Sáng tạo', description: 'Thêm một hoạt động lành mạnh của riêng bạn', icon: '🎨' },
 ];
 
+// ĐÃ SỬA: Cập nhật thang điểm khảo sát từ 1-5 thành 0-4
 const quizQuestions = {
     physical: [
-        { q: "Bạn có thường xuyên cảm thấy đau đầu, mỏi mắt, hoặc đau cổ, vai, gáy không?", score: [1, 2, 3, 4, 5] },
-        { q: "Giấc ngủ của bạn có bị gián đoạn hoặc khó ngủ do sử dụng thiết bị điện tử không?", score: [1, 2, 3, 4, 5] },
-        { q: "Bạn có thường xuyên cảm thấy cơ thể mệt mỏi, uể oải ngay cả khi không làm việc nặng nhọc không?", score: [1, 2, 3, 4, 5] },
-        { q: "Bạn có cảm thấy khó khăn khi rời khỏi màn hình để tham gia các hoạt động thể chất không?", score: [1, 2, 3, 4, 5] },
-        { q: "Bạn có thường xuyên có những bữa ăn qua loa để tiếp tục lướt mạng không?", score: [1, 2, 3, 4, 5] },
+        { q: "Bạn có thường xuyên cảm thấy đau đầu, mỏi mắt, hoặc đau cổ, vai, gáy không?", score: [0, 1, 2, 3, 4] },
+        { q: "Giấc ngủ của bạn có bị gián đoạn hoặc khó ngủ do sử dụng thiết bị điện tử không?", score: [0, 1, 2, 3, 4] },
+        { q: "Bạn có thường xuyên cảm thấy cơ thể mệt mỏi, uể oải ngay cả khi không làm việc nặng nhọc không?", score: [0, 1, 2, 3, 4] },
+        { q: "Bạn có cảm thấy khó khăn khi rời khỏi màn hình để tham gia các hoạt động thể chất không?", score: [0, 1, 2, 3, 4] },
+        { q: "Bạn có thường xuyên có những bữa ăn qua loa để tiếp tục lướt mạng không?", score: [0, 1, 2, 3, 4] },
     ],
     mental: [
-        { q: "Bạn có thường xuyên cảm thấy lo lắng, căng thẳng hoặc dễ cáu gắt không?", score: [1, 2, 3, 4, 5] },
-        { q: "Bạn có cảm thấy áp lực phải thể hiện một hình ảnh hoàn hảo trên mạng không?", score: [1, 2, 3, 4, 5] },
-        { q: "Bạn có cảm thấy buồn bã hoặc trống rỗng khi không được lướt mạng không?", score: [1, 2, 3, 4, 5] },
-        { q: "Bạn có cảm thấy lo sợ mình sẽ bỏ lỡ các xu hướng, tin tức trên mạng xã hội không?", score: [1, 2, 3, 4, 5] },
-        { q: "Bạn có thấy mình dễ dàng so sánh bản thân với người khác trên mạng xã hội không?", score: [1, 2, 3, 4, 5] },
+        { q: "Bạn có thường xuyên cảm thấy lo lắng, căng thẳng hoặc dễ cáu gắt không?", score: [0, 1, 2, 3, 4] },
+        { q: "Bạn có cảm thấy áp lực phải thể hiện một hình ảnh hoàn hảo trên mạng không?", score: [0, 1, 2, 3, 4] },
+        { q: "Bạn có cảm thấy buồn bã hoặc trống rỗng khi không được lướt mạng không?", score: [0, 1, 2, 3, 4] },
+        { q: "Bạn có cảm thấy lo sợ mình sẽ bỏ lỡ các xu hướng, tin tức trên mạng xã hội không?", score: [0, 1, 2, 3, 4] },
+        { q: "Bạn có thấy mình dễ dàng so sánh bản thân với người khác trên mạng xã hội không?", score: [0, 1, 2, 3, 4] },
     ],
     concentration: [
-        { q: "Bạn có dễ bị xao nhãng bởi điện thoại khi đang làm việc/học tập không?", score: [1, 2, 3, 4, 5] },
-        { q: "Bạn có kiểm tra điện thoại ngay khi nhận được thông báo không?", score: [1, 2, 3, 4, 5] },
-        { q: "Bạn có cảm thấy khó khăn khi phải tập trung vào một cuộc trò chuyện trực tiếp?", score: [1, 2, 3, 4, 5] },
-        { q: "Bạn có thể hoàn thành một nhiệm vụ mà không bị gián đoạn không?", score: [5, 4, 3, 2, 1] },
-        { q: "Bạn có thể đọc một cuốn sách mà không cần phải cầm điện thoại không?", score: [5, 4, 3, 2, 1] },
+        { q: "Bạn có dễ bị xao nhãng bởi điện thoại khi đang làm việc/học tập không?", score: [0, 1, 2, 3, 4] },
+        { q: "Bạn có kiểm tra điện thoại ngay khi nhận được thông báo không?", score: [0, 1, 2, 3, 4] },
+        { q: "Bạn có cảm thấy khó khăn khi phải tập trung vào một cuộc trò chuyện trực tiếp?", score: [0, 1, 2, 3, 4] },
+        { q: "Bạn có thường bị gián đoạn khi đang thực hiện một nhiệm vụ không?", score: [0, 1, 2, 3, 4] },
+        { q: "Bạn có thói quen sử dụng điện thoại khi đang đọc sách không?", score: [0, 1, 2, 3, 4] }, 
     ],
 };
 
@@ -222,7 +223,10 @@ function updateCountdownTimer() {
         String(minutesUntilReset).padStart(2, '0') + ':' +
         String(secondsUntilReset).padStart(2, '0');
     
-    document.getElementById('countdown-timer').textContent = formattedTime;
+    const countdownElement = document.getElementById('countdown-timer');
+    if (countdownElement) {
+        countdownElement.textContent = formattedTime;
+    }
 }
 
 // Start countdown timer
@@ -245,20 +249,26 @@ function formatDate(date) {
 // Update activity history display
 function updateActivityHistory() {
     const dateStr = currentHistoryDate.toISOString().slice(0, 10);
-    document.getElementById('history-date-display').textContent = formatDate(currentHistoryDate);
+    const historyDateDisplay = document.getElementById('history-date-display');
+    if (historyDateDisplay) {
+        historyDateDisplay.textContent = formatDate(currentHistoryDate);
+    }
     
     const allActivities = defaultHealthyActivities.concat(userData.customActivities || []);
     const completedActivities = userData.activityHistory[dateStr] || {};
+    const activityHistoryContainer = document.getElementById('activity-history-container');
     
-    document.getElementById('activity-history-container').innerHTML = allActivities.map(activity => `
-        <div class="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
-            <p class="text-gray-700">${activity.name}</p>
-            <span class="px-4 py-1 rounded-full text-sm font-semibold 
-                ${completedActivities[activity.id] ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}">
-                ${completedActivities[activity.id] ? 'Đã Xong' : 'Chưa làm'}
-            </span>
-        </div>
-    `).join('');
+    if (activityHistoryContainer) {
+        activityHistoryContainer.innerHTML = allActivities.map(activity => `
+            <div class="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
+                <p class="text-gray-700">${activity.name}</p>
+                <span class="px-4 py-1 rounded-full text-sm font-semibold 
+                    ${completedActivities[activity.id] ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}">
+                    ${completedActivities[activity.id] ? 'Đã Xong' : 'Chưa làm'}
+                </span>
+            </div>
+        `).join('');
+    }
 }
 
 // Initialize app
@@ -286,51 +296,66 @@ function initApp() {
 function updateMainUI() {
     // Update dashboard
     const totalUsageToday = userData.weeklyData[todayIndex] || 0;
-    document.getElementById('current-usage-display').textContent = `${totalUsageToday}p`;
+    const currentUsageDisplay = document.getElementById('current-usage-display');
+    if(currentUsageDisplay) currentUsageDisplay.textContent = `${totalUsageToday}p`;
+    
     const limit = userData.limit || 60;
-    document.getElementById('limit-input').value = limit;
-    document.getElementById('limit-message').innerHTML = `Giới hạn: <strong>${limit}p</strong>`;
+    const limitInput = document.getElementById('limit-input');
+    if(limitInput) limitInput.value = limit;
+    
+    const limitMessage = document.getElementById('limit-message');
+    if(limitMessage) limitMessage.innerHTML = `Giới hạn: <strong>${limit}p</strong>`;
 
     const percentage = Math.min((totalUsageToday / limit) * 100, 100);
-    document.getElementById('progress-bar').style.width = `${percentage}%`;
+    const progressBar = document.getElementById('progress-bar');
+    if(progressBar) progressBar.style.width = `${percentage}%`;
 
     if (totalUsageToday >= limit) {
-        document.getElementById('limit-message').innerHTML = `<span class="font-bold text-red-300">Bạn đã vượt quá giới hạn!</span>`;
+        if(limitMessage) limitMessage.innerHTML = `<span class="font-bold text-red-300">Bạn đã vượt quá giới hạn!</span>`;
     } else if (totalUsageToday > 0) {
-        document.getElementById('limit-message').innerHTML = `Còn lại: <strong>${Math.max(0, limit - totalUsageToday)}p</strong>`;
+        if(limitMessage) limitMessage.innerHTML = `Còn lại: <strong>${Math.max(0, limit - totalUsageToday)}p</strong>`;
     }
 
     // Update app usage inputs
     const allApps = socialApps.concat(userData.customApps || []);
-    document.getElementById('app-input-container').innerHTML = allApps.map(app => `
-        <div class="input-group">
-            <div class="app-icon" style="background-color: ${app.color || '#ccc'}">
-                <i class="${app.iconClass || 'fa-solid fa-plus'}"></i>
+    const appInputContainer = document.getElementById('app-input-container');
+    if(appInputContainer) {
+        appInputContainer.innerHTML = allApps.map(app => `
+            <div class="input-group">
+                <div class="app-icon" style="background-color: ${app.color || '#ccc'}">
+                    <i class="${app.iconClass || 'fa-solid fa-plus'}"></i>
+                </div>
+                <input type="number" id="input-${app.id}" placeholder="${app.name} (phút)" value="${(userData.appUsage[app.id] && userData.appUsage[app.id][todayIndex]) || 0}" class="flex-grow rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400">
             </div>
-            <input type="number" id="input-${app.id}" placeholder="${app.name} (phút)" value="${(userData.appUsage[app.id] && userData.appUsage[app.id][todayIndex]) || 0}" class="flex-grow rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-        </div>
-    `).join('');
+        `).join('');
+    }
 
     // Update activities
     const allActivities = defaultHealthyActivities.concat(userData.customActivities || []);
-    document.getElementById('healthy-activities-list').innerHTML = allActivities.map(activity => `
-        <div class="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
-            <p class="text-gray-700">${activity.name}</p>
-            <button id="activity-${activity.id}" data-id="${activity.id}" class="complete-activity-btn px-4 py-1 rounded-full text-sm font-semibold transition duration-300
-                ${userData.completedActivities[activity.id] ? 'bg-green-500 text-white cursor-not-allowed' : 'bg-indigo-200 text-indigo-700 hover:bg-indigo-300'}">
-                ${userData.completedActivities[activity.id] ? 'Đã Xong' : 'Hoàn Thành'}
-            </button>
-        </div>
-    `).join('');
+    const healthyActivitiesList = document.getElementById('healthy-activities-list');
+    if(healthyActivitiesList) {
+        healthyActivitiesList.innerHTML = allActivities.map(activity => `
+            <div class="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
+                <p class="text-gray-700">${activity.name}</p>
+                <button id="activity-${activity.id}" data-id="${activity.id}" class="complete-activity-btn px-4 py-1 rounded-full text-sm font-semibold transition duration-300
+                    ${userData.completedActivities[activity.id] ? 'bg-green-500 text-white cursor-not-allowed' : 'bg-indigo-200 text-indigo-700 hover:bg-indigo-300'}">
+                    ${userData.completedActivities[activity.id] ? 'Đã Xong' : 'Hoàn Thành'}
+                </button>
+            </div>
+        `).join('');
+    }
 
     // Update badges
-    document.getElementById('badges-grid').innerHTML = allBadges.map(badge => `
-        <div class="flex flex-col items-center space-y-2 p-3 rounded-xl bg-white shadow-sm transition-all transform hover:scale-105">
-            <span class="text-4xl ${userData.badges[badge.id] ? 'badge-earned' : 'badge-icon'}">${badge.icon}</span>
-            <p class="font-semibold text-center text-sm">${badge.name}</p>
-            <p class="text-xs text-center text-gray-500">${badge.description}</p>
-        </div>
-    `).join('');
+    const badgesGrid = document.getElementById('badges-grid');
+    if(badgesGrid) {
+        badgesGrid.innerHTML = allBadges.map(badge => `
+            <div class="flex flex-col items-center space-y-2 p-3 rounded-xl bg-white shadow-sm transition-all transform hover:scale-105">
+                <span class="text-4xl ${userData.badges[badge.id] ? 'badge-earned' : 'badge-icon'}">${badge.icon}</span>
+                <p class="font-semibold text-center text-sm">${badge.name}</p>
+                <p class="text-xs text-center text-gray-500">${badge.description}</p>
+            </div>
+        `).join('');
+    }
    
     // Update charts
     updateCharts();
@@ -346,6 +371,9 @@ function updateSurveyUI() {
 
 // Update Charts
 function updateCharts() {
+    const appUsageChartCtx = document.getElementById('app-usage-chart')?.getContext('2d');
+    if (!appUsageChartCtx) return; // Exit if chart canvas is not on the page
+
     const appLabels = socialApps.map(app => app.name);
     const appColors = socialApps.map(app => app.color);
     const appData = socialApps.map(app => (userData.appUsage[app.id] || Array(7).fill(0)));
@@ -363,7 +391,7 @@ function updateCharts() {
 
     // Line chart for individual app usage
     if (window.appUsageChart) window.appUsageChart.destroy();
-    window.appUsageChart = new Chart(document.getElementById('app-usage-chart').getContext('2d'), {
+    window.appUsageChart = new Chart(appUsageChartCtx, {
         type: 'line',
         data: {
             labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'CN', 'T7'].sort(),
@@ -380,9 +408,12 @@ function updateCharts() {
     });
 
     // Bar chart for total weekly usage
+    const weeklyUsageChartCtx = document.getElementById('weekly-usage-chart')?.getContext('2d');
+    if (!weeklyUsageChartCtx) return;
+
     if (window.weeklyUsageChart) window.weeklyUsageChart.destroy();
     const limitData = Array(7).fill(userData.limit || 60);
-    window.weeklyUsageChart = new Chart(document.getElementById('weekly-usage-chart').getContext('2d'), {
+    window.weeklyUsageChart = new Chart(weeklyUsageChartCtx, {
         type: 'bar',
         data: {
             labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'CN', 'T7'].sort(),
@@ -418,14 +449,15 @@ function updateCharts() {
     });
    
     // Quiz history chart
-    if (document.getElementById('quiz-history-chart')) {
+    const quizHistoryChartCtx = document.getElementById('quiz-history-chart')?.getContext('2d');
+    if (quizHistoryChartCtx) {
         if (window.quizHistoryChart) window.quizHistoryChart.destroy();
         const historyLabels = userData.quizHistory.map((entry, index) => `Lần ${index + 1}`);
         const physicalData = userData.quizHistory.map(entry => entry.scores.physical);
         const mentalData = userData.quizHistory.map(entry => entry.scores.mental);
         const concentrationData = userData.quizHistory.map(entry => entry.scores.concentration);
 
-        window.quizHistoryChart = new Chart(document.getElementById('quiz-history-chart').getContext('2d'), {
+        window.quizHistoryChart = new Chart(quizHistoryChartCtx, {
             type: 'line',
             data: {
                 labels: historyLabels,
@@ -437,7 +469,8 @@ function updateCharts() {
             },
             options: {
                 responsive: true,
-                scales: { y: { beginAtZero: true, suggestedMax: 25 } }
+                // ĐÃ SỬA: Cập nhật suggestedMax cho biểu đồ lịch sử khảo sát
+                scales: { y: { beginAtZero: true, suggestedMax: 20 } } // Đổi 25 thành 20
             }
         });
     }
@@ -446,7 +479,7 @@ function updateCharts() {
 // Show notification
 function showNotification(title, message) {
     const notification = document.createElement('div');
-    notification.className = 'notification-card bg-white p-4 rounded-xl shadow-lg flex items-center space-x-3 w-full max-w-sm';
+    notification.className = 'notification-card bg-white p-4 rounded-xl shadow-lg flex items-center space-x-3 w-full max-w-sm fixed top-4 right-4 z-50 transform transition-all duration-500 translate-x-full';
     notification.innerHTML = `
         <div class="flex-shrink-0">
             <svg class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -459,8 +492,18 @@ function showNotification(title, message) {
         </div>
     `;
     document.body.appendChild(notification);
+    
+    // Animate in
     setTimeout(() => {
-        notification.remove();
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
     }, 5000);
 }
 
@@ -473,42 +516,75 @@ function awardBadge(badgeId) {
     }
 }
 
-// Get quiz result evaluation
+// ĐÃ SỬA: Cập nhật toàn bộ hàm đánh giá với thang điểm và công thức mới
 function getQuizResultEvaluation(scores) {
     const { physical, mental, concentration } = scores;
-    const dependencyScore = ((physical * 0.4) + (mental * 0.4) + (concentration * 0.2)) / 5;
-    const dependencyPercentage = (dependencyScore / 5) * 100;
-    const formattedPercentage = dependencyPercentage.toFixed(2);
+    
+    // ĐÃ SỬA: Cập nhật công thức tính phần trăm
+    const totalScore = physical + mental + concentration;
+    const finalDependencyPercentage = (totalScore / 60) * 100; // Đổi 75 thành 60
+    const formattedDependencyPercentage = finalDependencyPercentage.toFixed(2);
    
     let evaluationDetails = `
-        <p><strong>Điểm phụ thuộc mạng xã hội của bạn là <span class="text-indigo-600 font-bold">${formattedPercentage}%</span>.</strong> Để hiểu rõ hơn về con số này, chúng ta hãy cùng phân tích chi tiết kết quả của bạn ở từng khía cạnh.</p>
+        <p><strong>Điểm phụ thuộc mạng xã hội của bạn là <span class="text-indigo-600 font-bold">${formattedDependencyPercentage}%</span>.</strong> Để hiểu rõ hơn về con số này, chúng ta hãy cùng phân tích chi tiết kết quả của bạn ở từng khía cạnh.</p>
         <div class="p-4 bg-white rounded-lg shadow-inner">
-            <h5 class="font-bold text-lg mb-2">1. Phân tích chi tiết từng khía cạnh</h5>
-            <p class="mb-1"><strong>Sức khỏe thể chất:</strong> (Điểm: ${physical}/25) - ${physical >= 15 ? 'Đang ở mức tốt.' : (physical >= 10 ? 'Cần cải thiện.' : 'Đang có vấn đề.')}</p>
-            <p class="text-sm pl-4 mb-2">${physical >= 15 ? 'Bạn đang duy trì một sức khỏe tốt, các dấu hiệu như đau đầu, mỏi mắt, hay mệt mỏi thể chất do sử dụng thiết bị điện tử dường như không phải là vấn đề lớn. Điều này cho thấy bạn đã biết cách cân bằng giữa màn hình và các hoạt động thể chất.' : (physical >= 10 ? 'Sức khỏe thể chất của bạn đang ở mức trung bình. Có thể bạn đã bắt đầu cảm thấy mỏi mắt, đau cổ hoặc giấc ngủ bị ảnh hưởng. Hãy chú ý hơn đến các dấu hiệu này, chúng là lời cảnh báo từ cơ thể bạn. Hãy thử các bài tập giãn cơ, nhìn ra xa sau mỗi 20 phút sử dụng điện thoại và đảm bảo ngủ đủ giấc.' : 'Điểm số của bạn cho thấy sức khỏe thể chất đang bị ảnh hưởng nghiêm trọng. Các vấn đề về thị lực, giấc ngủ và thể lực có thể là hậu quả trực tiếp của việc sử dụng mạng xã hội quá nhiều. Đây là lúc bạn cần ưu tiên việc chăm sóc bản thân, đảm bảo bạn có đủ giấc ngủ và dành thời gian cho các hoạt động thể chất để phục hồi năng lượng.')}</p>
+            <h5 class="font-bold text-lg mb-2">Phần 1: Phân tích chi tiết từng khía cạnh</h5>
+            
+            <h6 class="font-semibold text-md mb-2">Sức khỏe Thể chất (Physical)</h6>
+            ${physical < 7 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
+            <p class="mb-1">🟢 <strong>Mức độ: Đang ở mức tốt</strong> (Điểm: ${20 - physical}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
+            <p class="text-sm pl-4 mb-2 text-gray-600">Bạn đang duy trì được một nền tảng thể chất ổn định. Các biểu hiện tiêu cực như đau đầu, mỏi mắt hay rối loạn giấc ngủ do sử dụng thiết bị điện tử dường như không đáng kể. Điều này chứng tỏ bạn đã hình thành thói quen cân bằng giữa thời gian trước màn hình và hoạt động thể chất, giúp cơ thể có thời gian phục hồi năng lượng.<br>Đây là minh chứng cho sự tự điều chỉnh hành vi sử dụng công nghệ – một yếu tố quan trọng trong việc giảm thiểu ảnh hưởng của “dopamine loop” (vòng lặp dopamine) từ các nền tảng mạng xã hội.</p>
+            ` : (physical < 15 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
+            <p class="mb-1">🟡 <strong>Mức độ: Cần cải thiện</strong> (Điểm: ${20 - physical}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
+            <p class="text-sm pl-4 mb-2 text-gray-600">Sức khỏe thể chất của bạn đang có dấu hiệu giảm nhẹ do tác động từ việc sử dụng mạng xã hội. Các triệu chứng như mỏi mắt, căng cổ, hoặc rối loạn giấc ngủ có thể đang xuất hiện nhưng chưa nghiêm trọng. Cơ thể bạn đang gửi tín hiệu cảnh báo về sự quá tải cảm giác.<br>Hãy thiết lập “chu kỳ nghỉ kỹ thuật số” – cứ sau mỗi 20 phút sử dụng, hãy nhìn xa 20 giây (quy tắc 20-20-20), giãn cơ cổ, và hạn chế ánh sáng xanh vào ban đêm. Việc này giúp hệ thần kinh thị giác và cơ xương được tái tạo nhịp sinh học tự nhiên.</p>
+            ` : `
+            <p class="mb-1">🔴 <strong>Mức độ: Đang có vấn đề</strong> (Điểm: ${20 - physical}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
+            <p class="text-sm pl-4 mb-2 text-gray-600">Điểm số thấp cho thấy sức khỏe thể chất của bạn đang bị tổn hại rõ rệt. Tình trạng mệt mỏi, giảm thị lực, đau cơ hoặc mất ngủ có thể là hệ quả của việc tiếp xúc liên tục với kích thích số mà không có giai đoạn phục hồi.<br>Khi cơ thể rơi vào trạng thái này, não bộ sẽ tiết dopamine liên tục để duy trì cảm giác “hoạt động”, dẫn đến mệt mỏi mãn tính và suy giảm thể lực. Đây là thời điểm bạn cần thiết lập giới hạn công nghệ cá nhân: giảm thời gian dùng mạng, tăng vận động thể chất và ưu tiên giấc ngủ chất lượng để khôi phục trạng thái cân bằng sinh học.</p>
+            `)}
 
-            <p class="mb-1"><strong>Sức khỏe tinh thần:</strong> (Điểm: ${mental}/25) - ${mental >= 15 ? 'Rất ổn định.' : (mental >= 10 ? 'Cần được quan tâm.' : 'Đang bị ảnh hưởng nghiêm trọng.')}</p>
-            <p class="text-sm pl-4 mb-2">${mental >= 15 ? 'Bạn có một tinh thần vững vàng. Bạn không quá lo lắng về việc bỏ lỡ các xu hướng và ít bị ảnh hưởng bởi những hình ảnh hào nhoáng trên mạng. Điều này là một tài sản quý giá, giúp bạn sống trọn vẹn với hiện tại.' : (mental >= 10 ? 'Sức khỏe tinh thần của bạn đang ở mức cần được quan tâm. Có thể bạn đang cảm thấy áp lực phải thể hiện bản thân hoặc cảm giác trống rỗng khi không có mạng xã hội. Hãy thử viết nhật ký, trò chuyện với bạn bè hoặc tìm một sở thích mới để nuôi dưỡng cảm xúc tích cực.' : 'Điểm số thấp cho thấy bạn đang phải đối mặt với những vấn đề nghiêm trọng như lo lắng, cảm giác trống rỗng hoặc sợ bị bỏ lỡ. Mạng xã hội có thể là nguyên nhân chính dẫn đến những cảm xúc tiêu cực này. Việc so sánh bản thân với người khác có thể làm giảm lòng tự trọng. Đây là lúc bạn cần tìm kiếm sự giúp đỡ từ bạn bè, gia đình hoặc một chuyên gia tâm lý.')}</p>
+            <h6 class="font-semibold text-md mb-2 mt-4">Sức khỏe Tinh thần (Mental)</h6>
+            ${mental < 7 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
+            <p class="mb-1">🟢 <strong>Mức độ: Rất ổn định</strong> (Điểm: ${20 - mental}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
+            <p class="text-sm pl-4 mb-2 text-gray-600">Bạn đang sở hữu một trạng thái tâm lý vững vàng. Bạn ít bị chi phối bởi hiệu ứng “so sánh xã hội” (social comparison effect) và không quá lo lắng khi không cập nhật xu hướng mới. Điều này cho thấy bạn đã xây dựng được hàng rào nhận thức vững chắc trước các kích thích cảm xúc từ mạng xã hội – yếu tố nền tảng giúp duy trì cảm xúc tích cực và lòng tự trọng ổn định.<br>Đây là dấu hiệu của sức khỏe tinh thần kỹ thuật số (digital mental wellness), giúp bạn sử dụng công nghệ như công cụ phục vụ cuộc sống, chứ không phải để xác định giá trị bản thân.</p>
+            ` : (mental < 15 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
+            <p class="mb-1">🟡 <strong>Mức độ: Cần được quan tâm</strong> (Điểm: ${20 - mental}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
+            <p class="text-sm pl-4 mb-2 text-gray-600">Sức khỏe tinh thần của bạn đang ở mức dễ bị dao động. Việc lo lắng khi bị “bỏ lỡ” (FOMO) hoặc cảm thấy áp lực khi phải thể hiện bản thân trên mạng cho thấy dopamine từ các tương tác ảo đang ảnh hưởng đến vùng cảm xúc của não bộ.<br>Bạn nên dành thời gian tách khỏi môi trường mạng, viết nhật ký cảm xúc, hoặc tham gia các hoạt động mang tính kết nối thật như trò chuyện, đọc sách, hoặc học kỹ năng mới. Những hoạt động này giúp tái cân bằng hệ dopamine và củng cố cảm xúc tự nhiên thay vì phụ thuộc vào phản hồi ảo.</p>
+            ` : `
+            <p class="mb-1">🔴 <strong>Mức độ: Đang bị ảnh hưởng nghiêm trọng</strong> (Điểm: ${20 - mental}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
+            <p class="text-sm pl-4 mb-2 text-gray-600">Điểm số này cho thấy bạn đang trải qua mức độ căng thẳng hoặc lo âu cao liên quan đến việc sử dụng mạng xã hội. Cảm giác trống rỗng, mất tập trung, hoặc sợ bị lãng quên là dấu hiệu của dopamine burnout – khi não đã quen với việc được kích thích liên tục.<br>Lúc này, điều cần thiết là can thiệp cảm xúc tích cực: hạn chế tiếp xúc nội dung tiêu cực, nói chuyện với người thân hoặc tìm đến chuyên gia tâm lý để được hướng dẫn cách tái tạo năng lượng tinh thần và thoát khỏi sự phụ thuộc cảm xúc vào môi trường ảo.</p>
+            `)}
 
-            <p class="mb-1"><strong>Mức độ tập trung:</strong> (Điểm: ${concentration}/25) - ${concentration >= 15 ? 'Rất tốt.' : (concentration >= 10 ? 'Cần rèn luyện thêm.' : 'Đang rất thấp.')}</p>
-            <p class="text-sm pl-4 mb-2">${concentration >= 15 ? 'Bạn có khả năng tập trung tốt. Điều này giúp bạn học tập, làm việc hiệu quả và tận hưởng trọn vẹn các cuộc trò chuyện. Hãy tiếp tục duy trì thói quen tốt này.' : (concentration >= 10 ? 'Khả năng tập trung của bạn đang ở mức trung bình. Bạn dễ bị phân tâm bởi các thông báo và có thể khó khăn khi làm việc mà không kiểm tra điện thoại. Hãy thử các phương pháp như Pomodoro để dần dần cải thiện sự tập trung của mình.' : 'Mức độ tập trung của bạn đang ở mức báo động. Việc dễ dàng bị xao nhãng có thể là dấu hiệu rõ ràng nhất của sự phụ thuộc vào mạng xã hội. Điều này ảnh hưởng trực tiếp đến hiệu quả công việc và học tập. Hãy thử bắt đầu với những khoảng thời gian ngắn không sử dụng điện thoại và tăng dần lên.')}</p>
+            <h6 class="font-semibold text-md mb-2 mt-4">Mức độ Tập trung (Concentration)</h6>
+            ${concentration < 7 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
+            <p class="mb-1">🟢 <strong>Mức độ: Rất tốt</strong> (Điểm: ${20 - concentration}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
+            <p class="text-sm pl-4 mb-2 text-gray-600">Bạn có khả năng duy trì sự tập trung bền vững, phản ánh việc não bộ hoạt động ở trạng thái kiểm soát chứ không bị cuốn vào dòng chảy thông tin liên tục. Đây là một dấu hiệu đáng quý trong thời đại kỹ thuật số, cho thấy bạn đang sử dụng dopamine một cách có ý thức – chỉ kích hoạt khi cần thiết cho học tập và công việc.<br>Hãy tiếp tục phát huy bằng cách duy trì khoảng thời gian “deep work” (làm việc sâu), nơi bạn loại bỏ hoàn toàn thông báo và tập trung tuyệt đối vào một nhiệm vụ.</p>
+            ` : (concentration < 15 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
+            <p class="mb-1">🟡 <strong>Mức độ: Cần rèn luyện thêm</strong> (Điểm: ${20 - concentration}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
+            <p class="text-sm pl-4 mb-2 text-gray-600">Bạn có khả năng tập trung ở mức chấp nhận được, nhưng vẫn dễ bị gián đoạn bởi các tín hiệu số như thông báo, tin nhắn hoặc video ngắn. Điều này là biểu hiện của não bộ đang bị tái huấn luyện sai cách – thường xuyên chuyển đổi nhiệm vụ, khiến khả năng duy trì sự chú ý giảm.<br>Hãy thử phương pháp Pomodoro (làm việc 25 phút, nghỉ 5 phút), đồng thời tắt toàn bộ thông báo không cần thiết để não bộ tái lập khả năng tập trung tự nhiên.</p>
+            ` : `
+            <p class="mb-1">🔴 <strong>Mức độ: Đang rất thấp</strong> (Điểm: ${20 - concentration}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
+            <p class="text-sm pl-4 mb-2 text-gray-600">Điểm thấp cho thấy khả năng kiểm soát chú ý đang bị rối loạn nghiêm trọng, thường đi kèm với việc liên tục chuyển đổi giữa các ứng dụng và nội dung. Đây là dấu hiệu của digital distraction syndrome – hội chứng phân tán chú ý do sử dụng mạng xã hội quá mức.<br>Hãy bắt đầu bằng việc thiết lập vùng không công nghệ (no-screen zone) trong ngày, ví dụ như 30 phút sau khi thức dậy hoặc trước khi đi ngủ. Khi não bộ dần quen với “khoảng lặng thông tin”, mức dopamine sẽ ổn định và khả năng tập trung sẽ được phục hồi.</p>
+            `)}
         </div>
-       
+        
         <div class="p-4 bg-white rounded-lg shadow-inner mt-4">
-            <h5 class="font-bold text-lg mb-2">2. Tại sao điểm số tốt ở các phần riêng lại có thể dẫn đến kết quả phụ thuộc cao?</h5>
-            <p>Điều này nghe có vẻ mâu thuẫn, nhưng trên thực tế, nó rất phổ biến. Kết quả tổng thể không chỉ dựa trên việc bạn có bị ảnh hưởng tiêu cực hay không, mà còn về mức độ <strong>phụ thuộc vào hành vi</strong>. Một người có thể có sức khỏe thể chất và tinh thần khá tốt, nhưng nếu họ vẫn dành <strong>phần lớn thời gian trong ngày</strong> để lướt mạng xã hội một cách vô thức, thì mức độ phụ thuộc vẫn sẽ ở mức cao. Điều này giống như việc bạn có một chiếc xe với động cơ tốt, lốp xe ổn định, nhưng lại mất kiểm soát vô lăng — chiếc xe vẫn có thể đi được, nhưng nó không đi đúng hướng và có thể gặp nguy hiểm bất cứ lúc nào.</p>
-            <p class="mt-2">Mạng xã hội được thiết kế để gây nghiện, khiến chúng ta quay lại liên tục. Do đó, ngay cả khi bạn không cảm thấy căng thẳng hay mỏi mắt, hành vi lướt mạng vô thức, không có mục đích rõ ràng, cũng đã là một dạng phụ thuộc. Mục tiêu cuối cùng của ứng dụng này không chỉ là giúp bạn tránh những tác hại trực tiếp, mà còn là giúp bạn lấy lại quyền kiểm soát thời gian và sự tập trung của mình.</p>
-        </div>
-       
-        <div class="p-4 bg-white rounded-lg shadow-inner mt-4">
-            <h5 class="font-bold text-lg mb-2">3. Lời khuyên tổng thể</h5>
-            <p>${formattedPercentage >= 60 ? 'Mức độ phụ thuộc mạng xã hội của bạn khá cao. Mặc dù một số lĩnh vực có thể tốt, nhưng tổng thể cho thấy mạng xã hội đang chiếm phần lớn trong cuộc sống của bạn. Hãy bắt đầu bằng việc giảm thời gian sử dụng 10% mỗi tuần và tập trung vào các hoạt động ngoại tuyến.' : (formattedPercentage >= 40 ? 'Mức độ phụ thuộc của bạn ở mức trung bình. Bạn đã nhận ra tầm quan trọng của việc cân bằng. Hãy tiếp tục giảm dần thời gian sử dụng và khám phá thêm các hoạt động lành mạnh để cải thiện điểm số.' : 'Mức độ phụ thuộc của bạn rất thấp. Bạn đã có một lối sống cân bằng và lành mạnh. Hãy tiếp tục phát huy để luôn là người làm chủ cuộc sống số của mình!')}</p>
+            <h5 class="font-bold text-lg mb-2">Phần 2: Lời khuyên Tổng thể</h5>
+            ${finalDependencyPercentage <= 30 ? ` <!-- Giữ nguyên ngưỡng phần trăm -->
+            <p class="mb-1">🟢 <strong>Mức độ phụ thuộc thấp</strong></p>
+            <p class="text-sm pl-4 text-gray-600">Bạn đang làm rất tốt. Điểm số cao thể hiện bạn đã đạt đến trạng thái tự chủ kỹ thuật số – sử dụng công nghệ như công cụ hỗ trợ, không phải nguồn dopamine chính.<br>Hãy duy trì thói quen lành mạnh này bằng cách thường xuyên “detox thông tin”: tạm rời xa mạng xã hội 1 ngày mỗi tuần, dành thời gian cho thiên nhiên, sáng tạo, và tương tác thật. Đây là cách tốt nhất để duy trì sự tự do tinh thần trong kỷ nguyên số.</p>
+            ` : (finalDependencyPercentage <= 60 ? ` <!-- Giữ nguyên ngưỡng phần trăm -->
+            <p class="mb-1">🟡 <strong>Mức độ phụ thuộc trung bình</strong></p>
+            <p class="text-sm pl-4 text-gray-600">Bạn đang ở giai đoạn chuyển tiếp giữa thói quen và nhận thức. Mức độ phụ thuộc ở mức vừa phải, cho thấy bạn đã bắt đầu kiểm soát được thói quen, nhưng đôi khi vẫn để mạng xã hội ảnh hưởng cảm xúc.<br>Hãy xây dựng lịch sử dụng mạng có mục đích: chỉ truy cập khi cần, giới hạn thời gian, và ưu tiên hoạt động ngoại tuyến. Việc này giúp não bộ tái học cách tìm niềm vui từ thế giới thật.</p>
+            ` : `
+            <p class="mb-1">🔴 <strong>Mức độ phụ thuộc cao</strong></p>
+            <p class="text-sm pl-4 text-gray-600">Điểm số cho thấy mạng xã hội đang chi phối đáng kể hành vi và cảm xúc của bạn. Dù bạn có thể vẫn duy trì sức khỏe tốt, nhưng não bộ đã quen với việc tìm kiếm kích thích tức thời.<br>Hãy bắt đầu bằng việc giảm 10% thời gian sử dụng mỗi tuần, thay thế bằng các hoạt động mang lại dopamine tự nhiên: vận động, nghe nhạc, đọc sách hoặc giao tiếp thật. Đây là bước đầu của dopamine detox có kiểm soát, giúp khôi phục khả năng tập trung và sự tự chủ.</p>
+            `)}
         </div>
     `;
    
     return {
         evaluationDetails,
-        dependencyPercentage,
+        dependencyPercentage: finalDependencyPercentage, 
         finalAdvice: ''
     };
 }
@@ -539,36 +615,45 @@ function playBellSound() {
 
 function startTimer() {
     pomodoro.isRunning = true;
-    document.getElementById('start-pause-btn').textContent = 'Tạm Dừng';
-    document.getElementById('start-pause-btn').classList.remove('bg-green-500', 'hover:bg-green-600');
-    document.getElementById('start-pause-btn').classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-    document.getElementById('reset-btn').classList.remove('hidden');
+    const startPauseBtn = document.getElementById('start-pause-btn');
+    if(startPauseBtn) {
+        startPauseBtn.textContent = 'Tạm Dừng';
+        startPauseBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+        startPauseBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+    }
+    const resetBtn = document.getElementById('reset-btn');
+    if(resetBtn) resetBtn.classList.remove('hidden');
 
     pomodoro.intervalId = setInterval(() => {
         pomodoro.timeRemaining--;
-        document.getElementById('timer-display').textContent = formatTime(pomodoro.timeRemaining);
+        const timerDisplay = document.getElementById('timer-display');
+        if(timerDisplay) timerDisplay.textContent = formatTime(pomodoro.timeRemaining);
 
         if (pomodoro.timeRemaining <= 0) {
             playBellSound();
+            const timerStatus = document.getElementById('timer-status');
             if (pomodoro.isWorkTime) {
                 pomodoro.isWorkTime = false;
                 pomodoro.timeRemaining = pomodoro.breakDuration;
-                document.getElementById('timer-status').textContent = 'Giờ nghỉ!';
+                if(timerStatus) timerStatus.textContent = 'Giờ nghỉ!';
             } else {
                 pomodoro.isWorkTime = true;
                 pomodoro.timeRemaining = pomodoro.workDuration;
-                document.getElementById('timer-status').textContent = 'Bắt đầu một chu kỳ mới!';
+                if(timerStatus) timerStatus.textContent = 'Bắt đầu một chu kỳ mới!';
             }
-            document.getElementById('timer-display').textContent = formatTime(pomodoro.timeRemaining);
+            if(timerDisplay) timerDisplay.textContent = formatTime(pomodoro.timeRemaining);
         }
     }, 1000);
 }
 
 function pauseTimer() {
     pomodoro.isRunning = false;
-    document.getElementById('start-pause-btn').textContent = 'Tiếp Tục';
-    document.getElementById('start-pause-btn').classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-    document.getElementById('start-pause-btn').classList.add('bg-green-500', 'hover:bg-green-600');
+    const startPauseBtn = document.getElementById('start-pause-btn');
+    if(startPauseBtn) {
+        startPauseBtn.textContent = 'Tiếp Tục';
+        startPauseBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+        startPauseBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+    }
     clearInterval(pomodoro.intervalId);
 }
 
@@ -576,12 +661,19 @@ function resetTimer() {
     pauseTimer();
     pomodoro.isWorkTime = true;
     pomodoro.timeRemaining = pomodoro.workDuration;
-    document.getElementById('timer-display').textContent = formatTime(pomodoro.workDuration);
-    document.getElementById('timer-status').textContent = 'Sẵn sàng bắt đầu!';
-    document.getElementById('start-pause-btn').textContent = 'Bắt Đầu';
-    document.getElementById('start-pause-btn').classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-    document.getElementById('start-pause-btn').classList.add('bg-green-500', 'hover:bg-green-600');
-    document.getElementById('reset-btn').classList.add('hidden');
+    const timerDisplay = document.getElementById('timer-display');
+    const timerStatus = document.getElementById('timer-status');
+    const startPauseBtn = document.getElementById('start-pause-btn');
+    const resetBtn = document.getElementById('reset-btn');
+
+    if(timerDisplay) timerDisplay.textContent = formatTime(pomodoro.workDuration);
+    if(timerStatus) timerStatus.textContent = 'Sẵn sàng bắt đầu!';
+    if(startPauseBtn) {
+        startPauseBtn.textContent = 'Bắt Đầu';
+        startPauseBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+        startPauseBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+    }
+    if(resetBtn) resetBtn.classList.add('hidden');
 }
 
 // Event Listeners
@@ -607,7 +699,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Main page event listeners
     document.getElementById('set-limit-btn')?.addEventListener('click', async () => {
-        const newLimit = parseInt(document.getElementById('limit-input').value, 10);
+        const limitInput = document.getElementById('limit-input');
+        const newLimit = parseInt(limitInput?.value, 10);
         if (!isNaN(newLimit) && newLimit > 0) {
             userData.limit = newLimit;
             saveData();
@@ -620,7 +713,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let totalUsage = 0;
         socialApps.forEach(app => {
             const input = document.getElementById(`input-${app.id}`);
-            const value = parseInt(input.value, 10) || 0;
+            const value = parseInt(input?.value, 10) || 0;
             if (!userData.appUsage[app.id]) userData.appUsage[app.id] = Array(7).fill(0);
             userData.appUsage[app.id][todayIndex] = value;
             totalUsage += value;
@@ -633,14 +726,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('add-activity-btn')?.addEventListener('click', async () => {
-        const newActivityName = document.getElementById('new-activity-input').value.trim();
+        const newActivityInput = document.getElementById('new-activity-input');
+        const newActivityName = newActivityInput?.value.trim();
         if (newActivityName) {
             const newActivityId = newActivityName.replace(/\s+/g, '_').toLowerCase();
             const newActivity = { id: newActivityId, name: newActivityName };
             userData.customActivities = userData.customActivities || [];
             userData.customActivities.push(newActivity);
             saveData();
-            document.getElementById('new-activity-input').value = '';
+            if(newActivityInput) newActivityInput.value = '';
             showNotification("Hoạt động mới", "Bạn đã thêm một hoạt động lành mạnh mới!");
             awardBadge('custom_activity');
             updateMainUI();
@@ -718,7 +812,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('start-pause-btn')?.addEventListener('click', () => {
         if (pomodoro.timeRemaining <= 0) {
             pomodoro.timeRemaining = pomodoro.workDuration;
-            document.getElementById('timer-status').textContent = 'Giờ làm việc!';
+            const timerStatus = document.getElementById('timer-status');
+            if(timerStatus) timerStatus.textContent = 'Giờ làm việc!';
         }
         if (pomodoro.isRunning) {
             pauseTimer();
@@ -733,6 +828,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('start-quiz-btn')?.addEventListener('click', () => {
         const generateQuiz = (containerId, questions) => {
             const container = document.getElementById(containerId);
+            if (!container) return;
             container.innerHTML = questions.map((q, index) => `
                 <div class="quiz-question" data-category="${containerId}" data-index="${index}">
                     <p class="font-medium">${index + 1}. ${q.q}</p>
@@ -752,9 +848,13 @@ document.addEventListener('DOMContentLoaded', function() {
         generateQuiz('mental-questions', quizQuestions.mental);
         generateQuiz('concentration-questions', quizQuestions.concentration);
 
-        document.getElementById('start-quiz-btn').classList.add('hidden');
-        document.getElementById('submit-quiz-btn').classList.remove('hidden');
-        document.getElementById('quiz-status').textContent = 'Hãy trả lời tất cả các câu hỏi để xem kết quả.';
+        const startQuizBtn = document.getElementById('start-quiz-btn');
+        const submitQuizBtn = document.getElementById('submit-quiz-btn');
+        const quizStatus = document.getElementById('quiz-status');
+
+        if(startQuizBtn) startQuizBtn.classList.add('hidden');
+        if(submitQuizBtn) submitQuizBtn.classList.remove('hidden');
+        if(quizStatus) quizStatus.textContent = 'Hãy trả lời tất cả các câu hỏi để xem kết quả.';
     });
 
     document.getElementById('submit-quiz-btn')?.addEventListener('click', async () => {
@@ -774,47 +874,64 @@ document.addEventListener('DOMContentLoaded', function() {
         if (answeredCount === allQuestions.length) {
             const evaluation = getQuizResultEvaluation(scores);
            
-            document.getElementById('quiz-evaluation').innerHTML = evaluation.evaluationDetails;
-            document.getElementById('dependency-score').textContent = ``;
+            const quizEvaluationEl = document.getElementById('quiz-evaluation');
+            if(quizEvaluationEl) quizEvaluationEl.innerHTML = evaluation.evaluationDetails;
+
+            const dependencyScoreEl = document.getElementById('dependency-score');
+            if(dependencyScoreEl) {
+                dependencyScoreEl.textContent = `Điểm phụ thuộc: ${evaluation.dependencyPercentage.toFixed(2)}%`;
+            }
 
             const today = new Date().toISOString().slice(0, 10);
             userData.quizHistory.push({ date: today, scores: scores });
             saveData();
 
-            document.getElementById('quiz-result-section').classList.remove('hidden');
-            document.getElementById('quiz-status').classList.add('hidden');
-            document.getElementById('submit-quiz-btn').classList.add('hidden');
+            const quizResultSection = document.getElementById('quiz-result-section');
+            const quizStatus = document.getElementById('quiz-status');
+            const submitQuizBtn = document.getElementById('submit-quiz-btn');
+
+            if(quizResultSection) quizResultSection.classList.remove('hidden');
+            if(quizStatus) quizStatus.classList.add('hidden');
+            if(submitQuizBtn) submitQuizBtn.classList.add('hidden');
+            
             awardBadge('quiz_pro');
            
-            const dependencyPercentage = ((scores.physical * 0.4) + (scores.mental * 0.4) + (scores.concentration * 0.2)) / 5 * 20;
+            const dependencyPercentage = evaluation.dependencyPercentage;
             if (dependencyPercentage < 50) awardBadge('dependency_low_50');
             if (dependencyPercentage < 40) awardBadge('dependency_low_40');
             if (dependencyPercentage < 30) awardBadge('dependency_low_30');
 
-            if (window.quizChart) window.quizChart.destroy();
-            window.quizChart = new Chart(document.getElementById('quiz-chart').getContext('2d'), {
-                type: 'radar',
-                data: {
-                    labels: ['Thể chất', 'Tinh thần', 'Tập trung'],
-                    datasets: [{
-                        label: 'Điểm của bạn (càng cao càng tốt)',
-                        data: [scores.physical, scores.mental, scores.concentration],
-                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                        borderColor: '#6366f1',
-                        borderWidth: 2,
-                        pointBackgroundColor: '#6366f1'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    elements: { line: { borderWidth: 3 } },
-                    scales: { r: { suggestedMin: 0, suggestedMax: 25, pointLabels: { font: { size: 14 } } } }
-                }
-            });
+            const quizChartCanvas = document.getElementById('quiz-chart');
+            if (quizChartCanvas) {
+                if (window.quizChart) window.quizChart.destroy();
+                // ĐÃ SỬA: Cập nhật dữ liệu và cấu hình biểu đồ radar
+                window.quizChart = new Chart(quizChartCanvas.getContext('2d'), {
+                    type: 'radar',
+                    data: {
+                        labels: ['Thể chất', 'Tinh thần', 'Tập trung'],
+                        datasets: [{
+                            label: 'Điểm sức khỏe kỹ thuật số (càng cao càng tốt)',
+                            data: [20 - scores.physical, 20 - scores.mental, 20 - scores.concentration], // Đổi 25 thành 20
+                            backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                            borderColor: '#6366f1',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#6366f1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        elements: { line: { borderWidth: 3 } },
+                        scales: { r: { suggestedMin: 0, suggestedMax: 20, pointLabels: { font: { size: 14 } } } } // Đổi 25 thành 20
+                    }
+                });
+            }
            
             updateCharts();
         } else {
-            document.getElementById('quiz-status').textContent = 'Vui lòng trả lời tất cả các câu hỏi.';
+            const quizStatus = document.getElementById('quiz-status');
+            if(quizStatus) {
+                quizStatus.textContent = 'Vui lòng trả lời tất cả các câu hỏi.';
+            }
         }
     });
 
