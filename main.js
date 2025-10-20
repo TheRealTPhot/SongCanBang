@@ -19,6 +19,8 @@ let userData = {
 };
 
 const todayIndex = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+// SỬA LỖI: Tạo một chỉ số ngày mới phù hợp với biểu đồ (0=Mon, 1=Tue, ..., 6=Sun)
+const chartDayIndex = (todayIndex + 6) % 7;
 
 const socialApps = [
     { id: 'facebook', name: 'Facebook', color: '#1877f2', iconClass: 'fa-brands fa-facebook' },
@@ -60,7 +62,6 @@ const allBadges = [
     { id: 'custom_activity', name: 'Sáng tạo', description: 'Thêm một hoạt động lành mạnh của riêng bạn', icon: '🎨' },
 ];
 
-// ĐÃ SỬA: Cập nhật thang điểm khảo sát từ 1-5 thành 0-4
 const quizQuestions = {
     physical: [
         { q: "Bạn có thường xuyên cảm thấy đau đầu, mỏi mắt, hoặc đau cổ, vai, gáy không?", score: [0, 1, 2, 3, 4] },
@@ -161,6 +162,7 @@ function checkActivityReset() {
         });
         
         // Check if user stayed under limit yesterday
+        // SỬA LỖI: Logic này đã đúng vì nó cũng dùng cách tính tương tự
         const yesterdayIndex = (yesterday.getDay() + 6) % 7; // Convert to 0=Mon, 1=Tue, ..., 6=Sun
         const yesterdayUsage = userData.weeklyData[yesterdayIndex] || 0;
         const userLimit = userData.limit || 60;
@@ -188,6 +190,16 @@ function checkActivityReset() {
         
         // Show notification
         showNotification("Reset Hoạt Động", "Hoạt động lành mạnh đã được reset cho ngày mới!");
+    }
+
+    // THAY ĐỔI MỚI: Reset dữ liệu hàng tuần vào 6h sáng thứ Hai
+    const gmt7Day = (now.getUTCDay() + 7) % 7; // 0=Sun, 1=Mon, ..., 6=Sat
+    if (gmt7Day === 1 && gmt7Hours >= 6 && userData.lastWeeklyResetDate !== today) {
+        userData.weeklyData = Array(7).fill(0);
+        userData.appUsage = {};
+        userData.lastWeeklyResetDate = today;
+        saveData();
+        console.log("Dữ liệu hàng tuần đã được reset.");
     }
 }
 
@@ -295,7 +307,8 @@ function initApp() {
 // Update Main Page UI
 function updateMainUI() {
     // Update dashboard
-    const totalUsageToday = userData.weeklyData[todayIndex] || 0;
+    // SỬA LỖI: Sử dụng chartDayIndex thay vì todayIndex
+    const totalUsageToday = userData.weeklyData[chartDayIndex] || 0;
     const currentUsageDisplay = document.getElementById('current-usage-display');
     if(currentUsageDisplay) currentUsageDisplay.textContent = `${totalUsageToday}p`;
     
@@ -325,7 +338,7 @@ function updateMainUI() {
                 <div class="app-icon" style="background-color: ${app.color || '#ccc'}">
                     <i class="${app.iconClass || 'fa-solid fa-plus'}"></i>
                 </div>
-                <input type="number" id="input-${app.id}" placeholder="${app.name} (phút)" value="${(userData.appUsage[app.id] && userData.appUsage[app.id][todayIndex]) || 0}" class="flex-grow rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                <input type="number" id="input-${app.id}" placeholder="${app.name} (phút)" value="${(userData.appUsage[app.id] && userData.appUsage[app.id][chartDayIndex]) || 0}" class="flex-grow rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400">
             </div>
         `).join('');
     }
@@ -394,7 +407,8 @@ function updateCharts() {
     window.appUsageChart = new Chart(appUsageChartCtx, {
         type: 'line',
         data: {
-            labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'CN', 'T7'].sort(),
+            // THAY ĐỔI MỚI: Sắp xếp lại trục X để liền mạch từ Thứ Hai đến Chủ Nhật
+            labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
             datasets: datasets
         },
         options: {
@@ -416,7 +430,8 @@ function updateCharts() {
     window.weeklyUsageChart = new Chart(weeklyUsageChartCtx, {
         type: 'bar',
         data: {
-            labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'CN', 'T7'].sort(),
+            // THAY ĐỔI MỚI: Sắp xếp lại trục X để liền mạch
+            labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
             datasets: [
                 {
                     label: 'Thời gian sử dụng',
@@ -469,8 +484,7 @@ function updateCharts() {
             },
             options: {
                 responsive: true,
-                // ĐÃ SỬA: Cập nhật suggestedMax cho biểu đồ lịch sử khảo sát
-                scales: { y: { beginAtZero: true, suggestedMax: 20 } } // Đổi 25 thành 20
+                scales: { y: { beginAtZero: true, suggestedMax: 20 } }
             }
         });
     }
@@ -516,13 +530,13 @@ function awardBadge(badgeId) {
     }
 }
 
-// ĐÃ SỬA: Cập nhật toàn bộ hàm đánh giá với thang điểm và công thức mới
+// Get quiz result evaluation
 function getQuizResultEvaluation(scores) {
     const { physical, mental, concentration } = scores;
     
-    // ĐÃ SỬA: Cập nhật công thức tính phần trăm
+    // Tính điểm phụ thuộc cuối cùng để hiển thị
     const totalScore = physical + mental + concentration;
-    const finalDependencyPercentage = (totalScore / 60) * 100; // Đổi 75 thành 60
+    const finalDependencyPercentage = (totalScore / 60) * 100;
     const formattedDependencyPercentage = finalDependencyPercentage.toFixed(2);
    
     let evaluationDetails = `
@@ -531,48 +545,48 @@ function getQuizResultEvaluation(scores) {
             <h5 class="font-bold text-lg mb-2">Phần 1: Phân tích chi tiết từng khía cạnh</h5>
             
             <h6 class="font-semibold text-md mb-2">Sức khỏe Thể chất (Physical)</h6>
-            ${physical < 7 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
-            <p class="mb-1">🟢 <strong>Mức độ: Đang ở mức tốt</strong> (Điểm: ${20 - physical}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
-            <p class="text-sm pl-4 mb-2 text-gray-600">Bạn đang duy trì được một nền tảng thể chất ổn định. Các biểu hiện tiêu cực như đau đầu, mỏi mắt hay rối loạn giấc ngủ do sử dụng thiết bị điện tử dường như không đáng kể. Điều này chứng tỏ bạn đã hình thành thói quen cân bằng giữa thời gian trước màn hình và hoạt động thể chất, giúp cơ thể có thời gian phục hồi năng lượng.<br>Đây là minh chứng cho sự tự điều chỉnh hành vi sử dụng công nghệ – một yếu tố quan trọng trong việc giảm thiểu ảnh hưởng của “dopamine loop” (vòng lặp dopamine) từ các nền tảng mạng xã hội.</p>
-            ` : (physical < 15 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
-            <p class="mb-1">🟡 <strong>Mức độ: Cần cải thiện</strong> (Điểm: ${20 - physical}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
-            <p class="text-sm pl-4 mb-2 text-gray-600">Sức khỏe thể chất của bạn đang có dấu hiệu giảm nhẹ do tác động từ việc sử dụng mạng xã hội. Các triệu chứng như mỏi mắt, căng cổ, hoặc rối loạn giấc ngủ có thể đang xuất hiện nhưng chưa nghiêm trọng. Cơ thể bạn đang gửi tín hiệu cảnh báo về sự quá tải cảm giác.<br>Hãy thiết lập “chu kỳ nghỉ kỹ thuật số” – cứ sau mỗi 20 phút sử dụng, hãy nhìn xa 20 giây (quy tắc 20-20-20), giãn cơ cổ, và hạn chế ánh sáng xanh vào ban đêm. Việc này giúp hệ thần kinh thị giác và cơ xương được tái tạo nhịp sinh học tự nhiên.</p>
+            ${physical < 7 ? `
+            <p class="mb-1">🟢 <strong>Mức độ: Đang ở mức tốt</strong> (Điểm: ${20 - physical}/20)</p>
+            <p class="text-sm pl-4 mb-2 text-gray-600">Bạn đang duy trì được một nền tảng thể chất ổn định. Các biểu hiện tiêu cực như đau đầu, mỏi mắt hay rối loạn giấc ngủ do sử dụng thiết bị điện tử dường như không đáng kể. Điều này chứng tỏ bạn đã hình thành thói quen cân bằng giữa thời gian trước màn hình và hoạt động thể chất, giúp cơ thể có thời gian phục hồi năng lượng.<br>Đây là minh chứng cho sự tự điều chỉnh hành vi sử dụng công nghệ – một yếu tố quan trọng trong việc giảm thiểu ảnh hưởng của "dopamine loop" (vòng lặp dopamine) từ các nền tảng mạng xã hội.</p>
+            ` : (physical < 15 ? `
+            <p class="mb-1">🟡 <strong>Mức độ: Cần cải thiện</strong> (Điểm: ${20 - physical}/20)</p>
+            <p class="text-sm pl-4 mb-2 text-gray-600">Sức khỏe thể chất của bạn đang có dấu hiệu giảm nhẹ do tác động từ việc sử dụng mạng xã hội. Các triệu chứng như mỏi mắt, căng cổ, hoặc rối loạn giấc ngủ có thể đang xuất hiện nhưng chưa nghiêm trọng. Cơ thể bạn đang gửi tín hiệu cảnh báo về sự quá tải cảm giác.<br>Hãy thiết lập "chu kỳ nghỉ kỹ thuật số" – cứ sau mỗi 20 phút sử dụng, hãy nhìn xa 20 giây (quy tắc 20-20-20), giãn cơ cổ, và hạn chế ánh sáng xanh vào ban đêm. Việc này giúp hệ thần kinh thị giác và cơ xương được tái tạo nhịp sinh học tự nhiên.</p>
             ` : `
-            <p class="mb-1">🔴 <strong>Mức độ: Đang có vấn đề</strong> (Điểm: ${20 - physical}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
-            <p class="text-sm pl-4 mb-2 text-gray-600">Điểm số thấp cho thấy sức khỏe thể chất của bạn đang bị tổn hại rõ rệt. Tình trạng mệt mỏi, giảm thị lực, đau cơ hoặc mất ngủ có thể là hệ quả của việc tiếp xúc liên tục với kích thích số mà không có giai đoạn phục hồi.<br>Khi cơ thể rơi vào trạng thái này, não bộ sẽ tiết dopamine liên tục để duy trì cảm giác “hoạt động”, dẫn đến mệt mỏi mãn tính và suy giảm thể lực. Đây là thời điểm bạn cần thiết lập giới hạn công nghệ cá nhân: giảm thời gian dùng mạng, tăng vận động thể chất và ưu tiên giấc ngủ chất lượng để khôi phục trạng thái cân bằng sinh học.</p>
+            <p class="mb-1">🔴 <strong>Mức độ: Đang có vấn đề</strong> (Điểm: ${20 - physical}/20)</p>
+            <p class="text-sm pl-4 mb-2 text-gray-600">Điểm số thấp cho thấy sức khỏe thể chất của bạn đang bị tổn hại rõ rệt. Tình trạng mệt mỏi, giảm thị lực, đau cơ hoặc mất ngủ có thể là hệ quả của việc tiếp xúc liên tục với kích thích số mà không có giai đoạn phục hồi.<br>Khi cơ thể rơi vào trạng thái này, não bộ sẽ tiết dopamine liên tục để duy trì cảm giác "hoạt động", dẫn đến mệt mỏi mãn tính và suy giảm thể lực. Đây là thời điểm bạn cần thiết lập giới hạn công nghệ cá nhân: giảm thời gian dùng mạng, tăng vận động thể chất và ưu tiên giấc ngủ chất lượng để khôi phục trạng thái cân bằng sinh học.</p>
             `)}
 
             <h6 class="font-semibold text-md mb-2 mt-4">Sức khỏe Tinh thần (Mental)</h6>
-            ${mental < 7 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
-            <p class="mb-1">🟢 <strong>Mức độ: Rất ổn định</strong> (Điểm: ${20 - mental}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
-            <p class="text-sm pl-4 mb-2 text-gray-600">Bạn đang sở hữu một trạng thái tâm lý vững vàng. Bạn ít bị chi phối bởi hiệu ứng “so sánh xã hội” (social comparison effect) và không quá lo lắng khi không cập nhật xu hướng mới. Điều này cho thấy bạn đã xây dựng được hàng rào nhận thức vững chắc trước các kích thích cảm xúc từ mạng xã hội – yếu tố nền tảng giúp duy trì cảm xúc tích cực và lòng tự trọng ổn định.<br>Đây là dấu hiệu của sức khỏe tinh thần kỹ thuật số (digital mental wellness), giúp bạn sử dụng công nghệ như công cụ phục vụ cuộc sống, chứ không phải để xác định giá trị bản thân.</p>
-            ` : (mental < 15 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
-            <p class="mb-1">🟡 <strong>Mức độ: Cần được quan tâm</strong> (Điểm: ${20 - mental}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
-            <p class="text-sm pl-4 mb-2 text-gray-600">Sức khỏe tinh thần của bạn đang ở mức dễ bị dao động. Việc lo lắng khi bị “bỏ lỡ” (FOMO) hoặc cảm thấy áp lực khi phải thể hiện bản thân trên mạng cho thấy dopamine từ các tương tác ảo đang ảnh hưởng đến vùng cảm xúc của não bộ.<br>Bạn nên dành thời gian tách khỏi môi trường mạng, viết nhật ký cảm xúc, hoặc tham gia các hoạt động mang tính kết nối thật như trò chuyện, đọc sách, hoặc học kỹ năng mới. Những hoạt động này giúp tái cân bằng hệ dopamine và củng cố cảm xúc tự nhiên thay vì phụ thuộc vào phản hồi ảo.</p>
+            ${mental < 7 ? `
+            <p class="mb-1">🟢 <strong>Mức độ: Rất ổn định</strong> (Điểm: ${20 - mental}/20)</p>
+            <p class="text-sm pl-4 mb-2 text-gray-600">Bạn đang sở hữu một trạng thái tâm lý vững vàng. Bạn ít bị chi phối bởi hiệu ứng "so sánh xã hội" (social comparison effect) và không quá lo lắng khi không cập nhật xu hướng mới. Điều này cho thấy bạn đã xây dựng được hàng rào nhận thức vững chắc trước các kích thích cảm xúc từ mạng xã hội – yếu tố nền tảng giúp duy trì cảm xúc tích cực và lòng tự trọng ổn định.<br>Đây là dấu hiệu của sức khỏe tinh thần kỹ thuật số (digital mental wellness), giúp bạn sử dụng công nghệ như công cụ phục vụ cuộc sống, chứ không phải để xác định giá trị bản thân.</p>
+            ` : (mental < 15 ? `
+            <p class="mb-1">🟡 <strong>Mức độ: Cần được quan tâm</strong> (Điểm: ${20 - mental}/20)</p>
+            <p class="text-sm pl-4 mb-2 text-gray-600">Sức khỏe tinh thần của bạn đang ở mức dễ bị dao động. Việc lo lắng khi bị "bỏ lỡ" (FOMO) hoặc cảm thấy áp lực khi phải thể hiện bản thân trên mạng cho thấy dopamine từ các tương tác ảo đang ảnh hưởng đến vùng cảm xúc của não bộ.<br>Bạn nên dành thời gian tách khỏi môi trường mạng, viết nhật ký cảm xúc, hoặc tham gia các hoạt động mang tính kết nối thật như trò chuyện, đọc sách, hoặc học kỹ năng mới. Những hoạt động này giúp tái cân bằng hệ dopamine và củng cố cảm xúc tự nhiên thay vì phụ thuộc vào phản hồi ảo.</p>
             ` : `
-            <p class="mb-1">🔴 <strong>Mức độ: Đang bị ảnh hưởng nghiêm trọng</strong> (Điểm: ${20 - mental}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
+            <p class="mb-1">🔴 <strong>Mức độ: Đang bị ảnh hưởng nghiêm trọng</strong> (Điểm: ${20 - mental}/20)</p>
             <p class="text-sm pl-4 mb-2 text-gray-600">Điểm số này cho thấy bạn đang trải qua mức độ căng thẳng hoặc lo âu cao liên quan đến việc sử dụng mạng xã hội. Cảm giác trống rỗng, mất tập trung, hoặc sợ bị lãng quên là dấu hiệu của dopamine burnout – khi não đã quen với việc được kích thích liên tục.<br>Lúc này, điều cần thiết là can thiệp cảm xúc tích cực: hạn chế tiếp xúc nội dung tiêu cực, nói chuyện với người thân hoặc tìm đến chuyên gia tâm lý để được hướng dẫn cách tái tạo năng lượng tinh thần và thoát khỏi sự phụ thuộc cảm xúc vào môi trường ảo.</p>
             `)}
 
             <h6 class="font-semibold text-md mb-2 mt-4">Mức độ Tập trung (Concentration)</h6>
-            ${concentration < 7 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
-            <p class="mb-1">🟢 <strong>Mức độ: Rất tốt</strong> (Điểm: ${20 - concentration}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
-            <p class="text-sm pl-4 mb-2 text-gray-600">Bạn có khả năng duy trì sự tập trung bền vững, phản ánh việc não bộ hoạt động ở trạng thái kiểm soát chứ không bị cuốn vào dòng chảy thông tin liên tục. Đây là một dấu hiệu đáng quý trong thời đại kỹ thuật số, cho thấy bạn đang sử dụng dopamine một cách có ý thức – chỉ kích hoạt khi cần thiết cho học tập và công việc.<br>Hãy tiếp tục phát huy bằng cách duy trì khoảng thời gian “deep work” (làm việc sâu), nơi bạn loại bỏ hoàn toàn thông báo và tập trung tuyệt đối vào một nhiệm vụ.</p>
-            ` : (concentration < 15 ? ` <!-- ĐÃ SỬA: Cập nhật ngưỡng -->
-            <p class="mb-1">🟡 <strong>Mức độ: Cần rèn luyện thêm</strong> (Điểm: ${20 - concentration}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
+            ${concentration < 7 ? `
+            <p class="mb-1">🟢 <strong>Mức độ: Rất tốt</strong> (Điểm: ${20 - concentration}/20)</p>
+            <p class="text-sm pl-4 mb-2 text-gray-600">Bạn có khả năng duy trì sự tập trung bền vững, phản ánh việc não bộ hoạt động ở trạng thái kiểm soát chứ không bị cuốn vào dòng chảy thông tin liên tục. Đây là một dấu hiệu đáng quý trong thời đại kỹ thuật số, cho thấy bạn đang sử dụng dopamine một cách có ý thức – chỉ kích hoạt khi cần thiết cho học tập và công việc.<br>Hãy tiếp tục phát huy bằng cách duy trì khoảng thời gian "deep work" (làm việc sâu), nơi bạn loại bỏ hoàn toàn thông báo và tập trung tuyệt đối vào một nhiệm vụ.</p>
+            ` : (concentration < 15 ? `
+            <p class="mb-1">🟡 <strong>Mức độ: Cần rèn luyện thêm</strong> (Điểm: ${20 - concentration}/20)</p>
             <p class="text-sm pl-4 mb-2 text-gray-600">Bạn có khả năng tập trung ở mức chấp nhận được, nhưng vẫn dễ bị gián đoạn bởi các tín hiệu số như thông báo, tin nhắn hoặc video ngắn. Điều này là biểu hiện của não bộ đang bị tái huấn luyện sai cách – thường xuyên chuyển đổi nhiệm vụ, khiến khả năng duy trì sự chú ý giảm.<br>Hãy thử phương pháp Pomodoro (làm việc 25 phút, nghỉ 5 phút), đồng thời tắt toàn bộ thông báo không cần thiết để não bộ tái lập khả năng tập trung tự nhiên.</p>
             ` : `
-            <p class="mb-1">🔴 <strong>Mức độ: Đang rất thấp</strong> (Điểm: ${20 - concentration}/20)</p> <!-- ĐÃ SỬA: Cập nhật điểm tối đa -->
-            <p class="text-sm pl-4 mb-2 text-gray-600">Điểm thấp cho thấy khả năng kiểm soát chú ý đang bị rối loạn nghiêm trọng, thường đi kèm với việc liên tục chuyển đổi giữa các ứng dụng và nội dung. Đây là dấu hiệu của digital distraction syndrome – hội chứng phân tán chú ý do sử dụng mạng xã hội quá mức.<br>Hãy bắt đầu bằng việc thiết lập vùng không công nghệ (no-screen zone) trong ngày, ví dụ như 30 phút sau khi thức dậy hoặc trước khi đi ngủ. Khi não bộ dần quen với “khoảng lặng thông tin”, mức dopamine sẽ ổn định và khả năng tập trung sẽ được phục hồi.</p>
+            <p class="mb-1">🔴 <strong>Mức độ: Đang rất thấp</strong> (Điểm: ${20 - concentration}/20)</p>
+            <p class="text-sm pl-4 mb-2 text-gray-600">Điểm thấp cho thấy khả năng kiểm soát chú ý đang bị rối loạn nghiêm trọng, thường đi kèm với việc liên tục chuyển đổi giữa các ứng dụng và nội dung. Đây là dấu hiệu của digital distraction syndrome – hội chứng phân tán chú ý do sử dụng mạng xã hội quá mức.<br>Hãy bắt đầu bằng việc thiết lập vùng không công nghệ (no-screen zone) trong ngày, ví dụ như 30 phút sau khi thức dậy hoặc trước khi đi ngủ. Khi não bộ dần quen với "khoảng lặng thông tin", mức dopamine sẽ ổn định và khả năng tập trung sẽ được phục hồi.</p>
             `)}
         </div>
         
         <div class="p-4 bg-white rounded-lg shadow-inner mt-4">
             <h5 class="font-bold text-lg mb-2">Phần 2: Lời khuyên Tổng thể</h5>
-            ${finalDependencyPercentage <= 30 ? ` <!-- Giữ nguyên ngưỡng phần trăm -->
+            ${finalDependencyPercentage <= 30 ? `
             <p class="mb-1">🟢 <strong>Mức độ phụ thuộc thấp</strong></p>
-            <p class="text-sm pl-4 text-gray-600">Bạn đang làm rất tốt. Điểm số cao thể hiện bạn đã đạt đến trạng thái tự chủ kỹ thuật số – sử dụng công nghệ như công cụ hỗ trợ, không phải nguồn dopamine chính.<br>Hãy duy trì thói quen lành mạnh này bằng cách thường xuyên “detox thông tin”: tạm rời xa mạng xã hội 1 ngày mỗi tuần, dành thời gian cho thiên nhiên, sáng tạo, và tương tác thật. Đây là cách tốt nhất để duy trì sự tự do tinh thần trong kỷ nguyên số.</p>
-            ` : (finalDependencyPercentage <= 60 ? ` <!-- Giữ nguyên ngưỡng phần trăm -->
+            <p class="text-sm pl-4 text-gray-600">Bạn đang làm rất tốt. Điểm số cao thể hiện bạn đã đạt đến trạng thái tự chủ kỹ thuật số – sử dụng công nghệ như công cụ hỗ trợ, không phải nguồn dopamine chính.<br>Hãy duy trì thói quen lành mạnh này bằng cách thường xuyên "detox thông tin": tạm rời xa mạng xã hội 1 ngày mỗi tuần, dành thời gian cho thiên nhiên, sáng tạo, và tương tác thật. Đây là cách tốt nhất để duy trì sự tự do tinh thần trong kỷ nguyên số.</p>
+            ` : (finalDependencyPercentage <= 60 ? `
             <p class="mb-1">🟡 <strong>Mức độ phụ thuộc trung bình</strong></p>
             <p class="text-sm pl-4 text-gray-600">Bạn đang ở giai đoạn chuyển tiếp giữa thói quen và nhận thức. Mức độ phụ thuộc ở mức vừa phải, cho thấy bạn đã bắt đầu kiểm soát được thói quen, nhưng đôi khi vẫn để mạng xã hội ảnh hưởng cảm xúc.<br>Hãy xây dựng lịch sử dụng mạng có mục đích: chỉ truy cập khi cần, giới hạn thời gian, và ưu tiên hoạt động ngoại tuyến. Việc này giúp não bộ tái học cách tìm niềm vui từ thế giới thật.</p>
             ` : `
@@ -715,11 +729,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const input = document.getElementById(`input-${app.id}`);
             const value = parseInt(input?.value, 10) || 0;
             if (!userData.appUsage[app.id]) userData.appUsage[app.id] = Array(7).fill(0);
-            userData.appUsage[app.id][todayIndex] = value;
+            userData.appUsage[app.id][chartDayIndex] = value; // SỬA LỖI: dùng chartDayIndex
             totalUsage += value;
         });
 
-        userData.weeklyData[todayIndex] = totalUsage;
+        userData.weeklyData[chartDayIndex] = totalUsage; // SỬA LỖI: dùng chartDayIndex
         saveData();
         showNotification("Cập nhật thành công", `Tổng thời gian sử dụng hôm nay là ${totalUsage} phút.`);
         updateMainUI();
@@ -904,14 +918,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const quizChartCanvas = document.getElementById('quiz-chart');
             if (quizChartCanvas) {
                 if (window.quizChart) window.quizChart.destroy();
-                // ĐÃ SỬA: Cập nhật dữ liệu và cấu hình biểu đồ radar
                 window.quizChart = new Chart(quizChartCanvas.getContext('2d'), {
                     type: 'radar',
                     data: {
                         labels: ['Thể chất', 'Tinh thần', 'Tập trung'],
                         datasets: [{
                             label: 'Điểm sức khỏe kỹ thuật số (càng cao càng tốt)',
-                            data: [20 - scores.physical, 20 - scores.mental, 20 - scores.concentration], // Đổi 25 thành 20
+                            data: [20 - scores.physical, 20 - scores.mental, 20 - scores.concentration],
                             backgroundColor: 'rgba(99, 102, 241, 0.2)',
                             borderColor: '#6366f1',
                             borderWidth: 2,
@@ -921,7 +934,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     options: {
                         responsive: true,
                         elements: { line: { borderWidth: 3 } },
-                        scales: { r: { suggestedMin: 0, suggestedMax: 20, pointLabels: { font: { size: 14 } } } } // Đổi 25 thành 20
+                        scales: { r: { suggestedMin: 0, suggestedMax: 20, pointLabels: { font: { size: 14 } } } }
                     }
                 });
             }
@@ -946,6 +959,64 @@ document.addEventListener('DOMContentLoaded', function() {
             e.target.classList.remove('bg-white', 'text-gray-700');
         }
     });
+
+    // THÊM MỚI: Event Listener cho nút lưu biểu đồ tuần (ĐÃ CẬP NHẬT ĐỘ PHÂN GIẢI)
+    document.getElementById('save-weekly-chart-btn')?.addEventListener('click', () => {
+        if (window.weeklyUsageChart) {
+            try {
+                // CẬP NHẬT: Tăng độ phân giải lên 33x
+                const imageBase64 = window.weeklyUsageChart.toBase64Image({ scale: 3 });
+                
+                // Tạo một thẻ <a> tạm thời để tải file
+                const link = document.createElement('a');
+                link.href = imageBase64;
+                
+                // Tạo tên file có ngày tháng
+                const today = new Date().toISOString().slice(0, 10);
+                link.download = `bieu-do-tuan-${today}.png`;
+                
+                // Kích hoạt động việc tải về
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification("Thành công!", "Biểu đồ tuần đã được lưu thành công.");
+            } catch (error) {
+                console.error("Lỗi khi lưu biểu đồ:", error);
+                showNotification("Lỗi", "Không thể lưu biểu đồ. Vui lòng thử lại.");
+            }
+        } else {
+            showNotification("Lỗi", "Biểu đồ chưa sẵn sàng để lưu.");
+        }
+    });
+
+    // ===== THÊM MỚI: Event Listener cho nút lưu biểu đồ ứng dụng =====
+    document.getElementById('save-app-chart-btn')?.addEventListener('click', () => {
+        if (window.appUsageChart) {
+            try {
+                // TĂNG ĐỘ PHÂN GIẢI: Thêm { scale: 3 } để ảnh rõ nét hơn
+                const imageBase64 = window.appUsageChart.toBase64Image({ scale: 3 });
+                
+                const link = document.createElement('a');
+                link.href = imageBase64;
+                
+                const today = new Date().toISOString().slice(0, 10);
+                link.download = `bieu-do-theo-ung-dung-${today}.png`;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification("Thành công!", "Biểu đồ sử dụng theo ứng dụng đã được lưu.");
+            } catch (error) {
+                console.error("Lỗi khi lưu biểu đồ:", error);
+                showNotification("Lỗi", "Không thể lưu biểu đồ. Vui lòng thử lại.");
+            }
+        } else {
+            showNotification("Lỗi", "Biểu đồ chưa sẵn sàng để lưu.");
+        }
+    });
+    // ===== KẾT THÚC ĐOẠN CODE THÊM VÀO =====
 
     // Initialize badges on first visit
     if (Object.keys(userData.badges).length === 0) {
